@@ -2,7 +2,7 @@
 
 `timescale 1ps/1ps
 // `include "mux_2x1_data_flow.v"
-`include "mux_2x1_behavioral_2.v"
+`include "mux_2x1_behavioral_5.v"
 
 module mux_2x1_tb;
 
