@@ -97,6 +97,27 @@ Supports decimal, binary, octal, and hexadecimal numbers.
 3. Octal numbers: 0o or 0O followed by 0-7
 4. Hexadecimal numbers: 0x or 0X followed by 0-9, a-f, A-F
 
+Format:
+` [size] ‘[signed] base value`
+
+- size – size of the constant in bits
+  - if size is not specified default is 32 bits
+  - if size is larger – padding 0 for unsigned, msb for signed
+  - if size is smaller – left most bits truncated
+- signed – s or S if omitted unsigned
+- base – o or O, b or B, d or D, h or H
+- values of x, z and hex values a – f are _case insensitive_
+
+  - 5 ‘O 37, 4 ‘B 1x_01, 8 ‘SH2A, 6 ‘SO71
+  - 4 ‘D-4, (2+3) ‘D10, 3` B001 - incorrect
+
+- If any bit is x or z entire result is X
+- Size of result – size of the largest operand (incl target on left)
+- If any one operand is unsigned all operands are converted to unsigned before any operation takes place
+  - Unsigned – net, reg variable, integer in base format without S
+  - Signed – integer variable, integer in decimal format, integer in base format with S, signed reg variable, signed net
+  - `$signed` and `$unsigned` – system functions for conversion
+
 Examples:
 
 ```verilog
@@ -123,6 +144,8 @@ Identifiers are used to name modules, variables, function names, block names, in
 
 Four value logic: 0, 1, x, z
 
+Case insensitive X and Z
+
 1. 0: logic zero
 2. 1: logic one
 3. x: unknown logic value
@@ -133,11 +156,18 @@ Four value logic: 0, 1, x, z
 Represents a physical wire in the circuit, can be used to connect modules or gates.
 
 _Note:_
-_ A value of a wire can be read but not assigned to in a procedural block or in a function.
-_ A wire does not store its value. \* Must be driven by continuous assignment statements.
+
+- A value of a wire can be read but not assigned to in a procedural block or in a function.
+- A wire does not store its value. Must be driven by continuous assignment statements
+- Undeclared nets will default implicitly to type wire
+  - Can be changed using ‘default_nettype
+  - Can be set to none – for declaring explicitly
+
+`net_kind [signed] [ [msb:lsb] ] net1, net2 …;`
 
 ```verilog
     wire w1, w2, w3;
+    wire signed [7:0] prdata;
     wire [3:0] w4;
     wire [3:0] w5, w6, w7;
     assign w1 = w2 & w3;
@@ -146,6 +176,7 @@ _ A wire does not store its value. \* Must be driven by continuous assignment st
 ### Register
 
 All data objects on the left hand side of expressions in procedural block and functions.
+Default value - x
 
 _Note:_
 
@@ -203,6 +234,17 @@ Used mainly for loops, parameters and constants.
     end
 ```
 
+### Real
+
+- Decimal
+  - 2.0, 5.678, 0.1
+  - 2., .1 - incorrect
+- Scientific notation
+  - 3.6e2, 5E-4
+- not useful in synthesis
+- implicit conversion to integer by rounding defined by language
+  - 42.446, 42.45 – rounded to 42
+
 ### Time
 
 64 bit quantity used to represent time in simulation.
@@ -219,10 +261,17 @@ Used mainly for loops, parameters and constants.
 
 Parameters allow us to define constants that can be used in the code.
 
+- Value can be changed at compile time or by specifying parameter value in module instantiation
+
 ```verilog
     parameter WIDTH = 8;
     reg [WIDTH-1:0] r;
 ```
+
+#### Local parameter
+
+- Local to module cannot be changed at compile time or
+  module instantiation time.
 
 ### Arithmetic operators
 
@@ -314,6 +363,24 @@ _Always synthesized to a multiplexer_
     assign y = (a == b) ? c : d;
 ```
 
+### Precedence of operators
+
+- +, -, !, ~, &, ~&, |, ~|, ^, ^~, ~^ (reduction)
+- \*\* (power)
+- \*, /, %
+- +, - (binary add and subtract)
+- <<, >>, <<<. >>> (shift)
+- <, <=, >, >= (relational)
+- ==, !=, ===, !== (equality)
+- & (bit wise and)
+- ^, ^~, ~^ (bitwise)
+- | (bitwise or)
+- && (logical and)
+- || (logical or)
+- ?: (conditional)
+- {}, {{}} (concatenation and repetition)
+- operators associate left to right except conditional right to left
+
 ### Literals
 
 ```verilog
@@ -325,6 +392,21 @@ _Always synthesized to a multiplexer_
 ```
 
 _Note: The synthesizer can infer the bit length if we start with `'`_
+
+### Kinds of expression
+
+- Constant expression
+  - evaluates to a constant at compile time
+  - constant literals, parameter names, bit select and part select of a parameter, constant function calls
+- Scalar expression
+  - evaluates to a 1 bit result
+  - if a scalar result is expected and expression produces vector result a non-zero vector is treated as 1
+- Evaluating an expression
+  - determine expression size – size of largest operand
+  - determine signedness – if any operand is unsigned expression is unsigned.
+  - Target does not determine signedness
+  - all operands are coerced to the signedness, size of operands extended
+  - expression evaluated
 
 ### wires, registers and variables
 
@@ -348,7 +430,20 @@ Similar to python slice.
     assign b = a[3:0];
     assign c = a[3];
     assign b = a[3:0] + a[7:4];
+
+    integer mark; reg [0:15] inst_code;
+    inst_code[mark+:2] selects the bits mark and mark+1
+    inst_code[mark-:4] selects mark, mark-1, mark-2, mark-3
+
+    dout = data[index]; // multiplexer
+    mem[addr] = Store; // decoder
+
 ```
+
+- Indexed part select
+  - `net_or_reg_vector[base_expr+:const_width_expr]`
+  - `net_or_reg_vector[base_expr-:const_width_expr]`
+- If range is out of bounds or evaluates to an x or z the part select value is x
 
 ### Function call
 
@@ -392,6 +487,7 @@ Similar to python slice.
 
 - Instantiation is the process of creating an instance of a module within another module.
 - The module that contains the instance is called the parent module.
+- Unconnected inputs are driven to z
 
 _Note: Modules cant be instantiated inside a procedural block_
 
@@ -413,9 +509,21 @@ endmodule
 ### Parameterized modules
 
 - Modules can be parameterized by using the `#` operator.
+- Use local parameter if a parameter does not vary from one instance to another
+- Positional association
+  - mod2 #(5,2) u1 (a,b,c,d)
+  - order must match order of parameters declared in the module
+- Named association
+  - mod2 #(.param1(2),.param2(2)) u1 (a,b,c,d)
+  - need to specify only the parameters that have to be changed
+- Can be used only to pass parameter values down one level of hierarchy
+- External ports
+  - list of ports visible outside need not be same as internal ports
+  - module exter_p(.data(arb),.control(ctrl),.addr(byte));
 
 ```verilog
     module mux2x1 #(parameter WIDTH = 8) (a, b, s, y);
+    //(port_list) #(parameter_list) module_name (port_list);
         input [WIDTH-1:0] a, b;
         input s;
         output [WIDTH-1:0] y;
@@ -432,7 +540,7 @@ endmodule
 
 ```verilog
 module shift_n(in,out);
-    parameter n = 4;
+    parameter n = 4; // internal parameter
     assign out = in << n;
 endmodule
 
@@ -448,6 +556,23 @@ module shift_n_test;
     shift_n #(1) s1(a,b);
 endmodule
 
+```
+
+parameter value can be overridden by defparam
+
+```verilog
+module tb;
+      // Module instantiation override
+     design_ip  #(BUS_WIDTH = 64, DATA_WIDTH = 128) d0 ( [port list]);
+    // Use of defparam to override
+    defparam d0.FIFO_DEPTH = 128;
+endmodule
+
+```
+
+```verilog
+defparam hierpath1=value1, hierpath2 = value 2…..;
+defparam u5.DELAY=5, u5.uu1.BIT=2;
 ```
 
 ### Macros
@@ -745,9 +870,120 @@ always @(a or b)
         end
 ```
 
+### Generate block
+
+- Elaboration time selection or replication of certain statements
+  - Module and gate instantiation
+  - Continuous assignment
+  - Always and initial statement
+- generate …. endgenerate
+  - generate loop
+  - generate conditional
+  - generate case
+  - Nested generate
+
+#### Generate loop
+
+```verilog
+generate
+    for (initial_expr; final_expr; assignment) begin: label
+        statements
+    end
+endgenerate
+```
+
+```verilog
+/*
+Boolean expression for conversion of gray to binary code for n-bit :
+B_n = G_n
+B_n-1 = B_n XOR G_n-1 = G_n XOR G_n-1 : :
+B_1 = B_2 XOR G_1 = G_n XOR ………… XOR G_1
+https://www.geeksforgeeks.org/code-converters-binary-to-from-gray-code/
+*/
+
+#todo: does this synthesize multiple xor gates?
+module gray2bin1(gray,bin)
+    parameter SIZE=8;
+    input [SIZE-1:0] gray; output [SIZE-1:0] bin;
+    genvar i;
+    generate
+        for (i=0; i< SIZE; i=i+1)begin: bit
+            assign bin[i] = ^gray[SIZE-1:i];
+        end
+    endgenerate
+endmodule
+```
+
+**`always` block in generate loop**
+
+```verilog
+module gray2bin2(gray,bin)
+    parameter SIZE=8;
+    input [SIZE-1:0] gray; output reg [SIZE-1:0] bin;
+    genvar i;
+    generate for (i=0; i< SIZE; i=i+1) begin: bit
+                always @(*)
+                    bin[i] = ^gray[SIZE-1:i];
+            end
+    endgenerate
+endmodule
+
+```
+
+**Conditional statements in generate loop**
+_Note: the condition must be a static condition,computable at elaborate time_
+
+```verilog
+module adder_nbit(x,y,cin,sum,cout);
+    parameter N=4;
+    input [N-1:0] x,y; input cin;
+    output [N-1:0] sum; output cout;
+    genvar i;
+    wire [N-2:0] c;
+    generate
+        for (i=0;i<N; i=i+1)
+        begin : adder
+            if(i==0) full_adder fa (x[i],y[i],cin,sum[i],c[i]);
+            else if (i==N-1) full_adder fa (x[i],y[i],c[i-1],sum[i],cout);
+            else full_adder fa (x[i],y[i],c[i-1],sum[i],c[i]);
+        end
+    endgenerate
+endmodule
+```
+
+**Generate Case**
+
+```verilog
+module adder_nbit(x,y,cin,sum,cout);
+    parameter N=4;
+    input [N-1:0] x,y; input cin;
+    output [N-1:0] sum; output cout;
+    genvar i;
+    wire [N-2:0] c;
+    generate
+        for (i=0;i<N; i=i+1)
+        begin : adder
+            case (i)
+                0: assign {c[i],sum[i]} = x[i]+y[i]+cin;
+                N-1: assign {cout,sum[i]} = x[i]+y[i]+c[i-1];
+                default: assign {c[i],sum[i]} = x[i]+y[i]+c[i-1];
+            endcase
+        end
+    endgenerate
+end module
+```
+
 ## Tasks and functions
 
 ### funtions
+
+```verilog
+function [automatic] [signed] [range_or_type] function_id ([input_declarations]);
+    [other_declarations]
+    procedural_statement
+endfunction
+
+```
 
 - declared within a module
 - can be called from continuous assignments, always blocks or other functions
@@ -755,6 +991,7 @@ always @(a or b)
 - in procedure they are evaluated when invoked
 - functions describe combinational logic and do not generate latches
 - good way to reuse procedural code since modules cant be invoked within a procedure
+- automatic – local variables are allocated new for each function call
 
 #### declaration
 
@@ -775,7 +1012,32 @@ always @(a or b)
     wire [7:0] b;
     wire [7:0] c;
     assign c = adder(a, b);
+```
 
+```verilog
+module mux16to1 (W, S16, f);
+    input [0:15]W;
+    input [3:0] S16;
+    output reg f;
+    // Function that specifies a 4-to-1 multiplexer
+    function mux4to1;
+        input [0:3] X;
+        input [1:0] S4;
+        case (S4)
+            0: mux4to1 = X[0];
+            1: mux4to1 = X[1];
+            2: mux4to1 = X[2];
+            3: mux4to1 = X[3];
+        endcase
+    endfunction
+    always @(W, S16)
+        case (S16[3:2])
+            0: f = mux4to1 (W[0:3], S16[1:0]);
+            1: f = mux4to1 (W[4:7], S16[1:0]);
+            2: f = mux4to1 (W[8:11], S16[1:0]);
+            3: f = mux4to1 (W[12:15], S16[1:0]);
+        endcase
+endmodule
 ```
 
 _Note:_
@@ -786,6 +1048,20 @@ _Note:_
 - _no recursive function_
 - _cant invoke task, as tasks can contain time controlled statements_
 - _function must return the value to the implicit function name register_
+
+`parameter` value can be overridden by `defparam`
+**Constant Functions**
+
+```verilog
+module example_const_fn;
+    parameter vector_lsb=7, vector_msb=15;
+    reg [get_largest(vector_lsb,vector_msb):0] mac_address;
+    // function declaration
+    function integer get_largest(input integer first, second);
+        get_largest = (first > second)? first : second;
+    endfunction
+endmodule
+```
 
 ### tasks
 
@@ -1003,6 +1279,21 @@ output logic -> combinational logic
     X[1] = 1'b0; // Assign 0 to the 2nd element of X
     X1[2] = 8'bAA; // Assign AA to the 3rd element of X1
     X2[1][3] = 8'bAA; // Assign AA to the 4th element of X2
+
+    reg [1:8] hdlc_ram[0:63], intr_ack;
+    intr_ack = hdlc_ram[60];
+    hdlc_ram[60][2];// - value at index 2 of 60th element
+    hdlc_ram[15][2:4];// – value from index [2:4] of 15th element
+    hdlc_ram[0:2];// – not allowed
+
+    reg [7:0] sense_data [15:0][15:0];
+    integer three_d [255:0][255:0][255:0];
+    wire xbar [3:0][3:0];
+    sense_data[2][3];// - ok
+    sense_data[1][1][0];// - ok
+    three_d[5][5][2];// - ok
+    three_d[5][1:5][2];// – not allowed
+    xbar[0][2:0];// – not allowed
 ```
 
 _NOTE:_
