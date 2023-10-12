@@ -1,0 +1,133 @@
+{
+  "nodes": [
+    {
+      "x": 191,
+      "y": 136,
+      "text": "S_0/0",
+      "isAcceptState": true,
+      "textOnly": false
+    },
+    {
+      "x": 445,
+      "y": 136,
+      "text": "S_1/0",
+      "isAcceptState": true,
+      "textOnly": false
+    },
+    {
+      "x": 445,
+      "y": 283,
+      "text": "S_2/0",
+      "isAcceptState": true,
+      "textOnly": false
+    },
+    {
+      "x": 445,
+      "y": 420,
+      "text": "S_3/0",
+      "isAcceptState": true,
+      "textOnly": false
+    },
+    {
+      "x": 191,
+      "y": 420,
+      "text": "S_4/1",
+      "isAcceptState": true,
+      "textOnly": false
+    }
+  ],
+  "links": [
+    {
+      "type": "SelfLink",
+      "node": 0,
+      "text": "0",
+      "anchorAngle": -2.1421338066285234
+    },
+    {
+      "type": "StartLink",
+      "node": 0,
+      "text": "reset",
+      "deltaX": -100,
+      "deltaY": 0
+    },
+    {
+      "type": "SelfLink",
+      "node": 1,
+      "text": "1",
+      "anchorAngle": -1.3191810065738596
+    },
+    {
+      "type": "Link",
+      "nodeA": 0,
+      "nodeB": 1,
+      "text": "1",
+      "lineAngleAdjust": 0,
+      "parallelPart": 0.5683143352418975,
+      "perpendicularPart": 0
+    },
+    {
+      "type": "Link",
+      "nodeA": 1,
+      "nodeB": 2,
+      "text": "0",
+      "lineAngleAdjust": 0,
+      "parallelPart": 0.6122448979591837,
+      "perpendicularPart": 26
+    },
+    {
+      "type": "Link",
+      "nodeA": 3,
+      "nodeB": 4,
+      "text": "1",
+      "lineAngleAdjust": 0,
+      "parallelPart": 0.5,
+      "perpendicularPart": 0
+    },
+    {
+      "type": "Link",
+      "nodeA": 4,
+      "nodeB": 0,
+      "text": "0",
+      "lineAngleAdjust": 0,
+      "parallelPart": 0.6056338028169014,
+      "perpendicularPart": 0
+    },
+    {
+      "type": "Link",
+      "nodeA": 4,
+      "nodeB": 1,
+      "text": "1",
+      "lineAngleAdjust": 3.141592653589793,
+      "parallelPart": 0.5255558923208332,
+      "perpendicularPart": -47.614993851618934
+    },
+    {
+      "type": "Link",
+      "nodeA": 2,
+      "nodeB": 3,
+      "text": "0",
+      "lineAngleAdjust": 0,
+      "parallelPart": 0.5,
+      "perpendicularPart": 0
+    },
+    {
+      "type": "Link",
+      "nodeA": 2,
+      "nodeB": 1,
+      "text": "1",
+      "lineAngleAdjust": 0,
+      "parallelPart": 0.5170068027210885,
+      "perpendicularPart": 21
+    },
+    {
+      "type": "Link",
+      "nodeA": 3,
+      "nodeB": 0,
+      "text": "0",
+      "lineAngleAdjust": 0,
+      "parallelPart": 0.5061995426115229,
+      "perpendicularPart": 42.36059975554677
+    }
+  ],
+  "nodeRadius": 32
+}
