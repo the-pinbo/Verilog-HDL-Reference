@@ -1,0 +1,16 @@
+clock=1, data=0, output=0
+clock=1, data=1, output=0
+clock=1, data=0, output=0
+clock=1, data=1, output=0
+clock=1, data=0, output=1
+clock=1, data=0, output=0
+clock=1, data=0, output=0
+clock=1, data=1, output=0
+clock=1, data=1, output=0
+clock=1, data=1, output=0
+clock=1, data=0, output=0
+clock=1, data=0, output=0
+clock=1, data=0, output=0
+clock=1, data=1, output=0
+clock=1, data=0, output=0
+clock=1, data=0, output=0
