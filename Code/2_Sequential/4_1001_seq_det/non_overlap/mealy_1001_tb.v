@@ -1,5 +1,5 @@
 `timescale 1ps/1ps
-`include "mealy_1001_reg_op_next_st.v"
+`include "mealy_1001_reg_op.v"
 
 module mealy_1001_tb;
     parameter t_PERIOD = 100;

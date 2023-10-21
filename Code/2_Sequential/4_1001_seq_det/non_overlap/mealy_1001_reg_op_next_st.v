@@ -15,7 +15,7 @@ module mealy_1001 (
 
     // Next state logic 
     always@(data_in or present_state) begin: L_NEXT_STATE_LOGIC
-        case(present_state)
+        casex(present_state)
             S0: next_state = data_in?S1:S0;
             S1: next_state = data_in?S1:S2;
             S2: next_state = data_in?S1:S3;
@@ -25,8 +25,8 @@ module mealy_1001 (
     end
 
     // Output decoder 
-    always@(data_in or next_state) begin: L_OUTPUT_DECODER
-        case(next_state)
+    always@(next_state) begin: L_OUTPUT_DECODER
+        casex(next_state)
             S0: data_out_next = 1'b0;
             S1: data_out_next = 1'b0;
             S2: data_out_next = 1'b0;
