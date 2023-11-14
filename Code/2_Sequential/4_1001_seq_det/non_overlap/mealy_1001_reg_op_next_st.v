@@ -25,7 +25,7 @@ module mealy_1001 (
     end
 
     // Output decoder 
-    always@(next_state) begin: L_OUTPUT_DECODER
+    always@(next_state or data_in) begin: L_OUTPUT_DECODER
         casex(next_state)
             S0: data_out_next = 1'b0;
             S1: data_out_next = 1'b0;

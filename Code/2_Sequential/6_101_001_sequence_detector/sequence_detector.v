@@ -39,7 +39,7 @@ module sequence_detector(
 			s6 : if(x == 0) begin next_state = s7; {y, z} = 2'b00; end else begin next_state = s6; {y, z} = 2'b00; end
 			s7 : if(x == 0) begin next_state = s7; {y, z} = 2'b00; end else begin next_state = s8; {y, z} = 2'b00; end
 			s8 : if(x == 0) begin next_state = s7; {y, z} = 2'b00; end else begin next_state = s6; {y, z} = 2'b01; end
-			default : begin next_state = s0; {y, z} = 2'b00; end
+			default : begin {next_state, y, z}= {s0,2'b00}; end
 		endcase
 		
 endmodule
