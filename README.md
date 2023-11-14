@@ -14,17 +14,21 @@ There are two types of code in most HDLs:
 
 1. Structural code: verbal description of the circuit without storage
    Example:
+
    ```verilog
    assign a = b & c;
    ```
+
 2. Procedural code: description of the circuit with storage or convenient for describing conditional logic
    Example:
+
    ```verilog
    always @(posedge clk)
    begin
       a <= b & c;
    end
    ```
+
    if and case statements are also procedural code, the synthesis tool will convert them into combinational logic.
 
 ### Verilog HDL levels of abstraction
@@ -49,6 +53,7 @@ Example:
    ```
 
 2. Gate level
+
    ```verilog
    module and_gate (a, b, y);
       input a, b;
@@ -56,7 +61,9 @@ Example:
       and (y, a, b);
    endmodule
    ```
+
 3. Dataflow level
+
    ```verilog
     module and_gate (a, b, y);
         input a, b;
@@ -64,7 +71,9 @@ Example:
         assign y = a & b;
     endmodule
    ```
+
 4. Behavioral level
+
    ```verilog
    module and_gate (a, b, s, y);
        input a, b, s;
@@ -98,7 +107,7 @@ Supports decimal, binary, octal, and hexadecimal numbers.
 4. Hexadecimal numbers: 0x or 0X followed by 0-9, a-f, A-F
 
 Format:
-` [size] ‘[signed] base value`
+`[size] ‘[signed] base value`
 
 - size – size of the constant in bits
   - if size is not specified default is 32 bits
@@ -767,7 +776,7 @@ _NOTE: Best practice to use defaults with `x` when not needed. The synthesizer w
     endcase
 ```
 
-- ` casex`: `x`, `z` and `?` are treated as don't cares. They match with any value.
+- `casex`: `x`, `z` and `?` are treated as don't cares. They match with any value.
 
 ```verilog
     casex({x,y})
@@ -779,7 +788,7 @@ _NOTE: Best practice to use defaults with `x` when not needed. The synthesizer w
     endcase
 ```
 
-- ` casez`: `z` and `?` are treated as don't cares. They match with any value.
+- `casez`: `z` and `?` are treated as don't cares. They match with any value.
 
 ```verilog
 
@@ -813,6 +822,7 @@ _NOTE: Best practice to use defaults with `x` when not needed. The synthesizer w
 ### wait
 
 - delay execution until the specified condition is true.
+
   ```verilog
       wait(a == 1'b1)
         a = b + c;
