@@ -1,10 +1,10 @@
-# icarus-verilog
+# Verilog HDL hand book
+
+## icarus-verilog
 
 - `iverilog/bin/gtkwave.exe` to open the waveform viewer
 - `iverilog/bin/iverilog.exe` to compile the verilog code
 - `iverilog/bin/vvp.exe` servers as the simulation runtime engine
-
-# Verilog HDL
 
 ## Introduction to Verilog HDL
 
